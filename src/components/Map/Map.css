@@ -1,12 +1,24 @@
 #map {
-    height: 400px;
-    width: 50%;  
+    /* display: flex; */
+    height: 50vh;
+    width: 80vw;  
+    border: solid 0.1pt rgb(196, 196, 196);
+    border-radius: 10pt;
 }
 
 .clicked-coordinates {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
+    margin-top: 2vh;
+    padding: 1vw;
+    border: 1px solid #8a8a8a;
     background-color: #f9f9f9;
-    width: 50%; 
+    width: 50%;
+
+    /* margin-left: */
+
+    margin-left: auto; /* Auto margin on left side */
+    margin-right: auto; /* Auto margin on right side */
+}
+
+.slider {
+    margin-top: 5vh;
 }

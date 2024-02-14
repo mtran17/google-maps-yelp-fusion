@@ -1,0 +1,13 @@
+.search-box {
+    margin-top: 3vh;
+    padding-top: 3vh;
+
+    padding-left: 10vw;
+    
+    border: solid black 2px ;
+    width: 40vw;
+    height: 10vh;
+
+    margin-left: auto; /* Auto margin on left side */
+    margin-right: auto; /* Auto margin on right side */
+} 
