@@ -1,7 +1,7 @@
 #map {
     /* display: flex; */
     height: 50vh;
-    width: 80vw;  
+    width: 60vw;  
     border: solid 0.1pt rgb(196, 196, 196);
     border-radius: 10pt;
 }

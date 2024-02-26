@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Slider from '@mui/material/Slider';
 import './Map.css'
 
-const Map = ({ onLatLngChange }) => {
+const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
   const [clickedLatLng, setClickedLatLng] = useState({ lat: 33.88134, lng: -117.8818 });
-  const [radius, setRadius] = useState(10000);
-  const [circle, setCircle] = useState(null);
+  const [nRadius, setRadius] = useState(10000);
+  const mapRef = useRef(null);
+  const circleRef = useRef(null);
+
+  const handleRadiusChange = (event, newValue) => {
+    // console.log('Radius changed to:', newValue); 
+    setRadius(newValue);
+    if (circleRef.current) {
+      circleRef.current.setRadius(newValue);
+      onRadiusChange(newValue);
+    }
+  };
 
   useEffect(() => {
     const loadGoogleMapsScript = () => {
@@ -22,72 +32,69 @@ const Map = ({ onLatLngChange }) => {
 
 
     const initMap = () => {
-        if (window.google && window.google.maps && window.google.maps.Map) {
-            const position = { lat: 33.88134, lng: -117.8818 };
-            const map = new window.google.maps.Map(document.getElementById('map'), {
-            zoom: 11,
-            center: position,
-            mapId: 'DEMO_MAP_ID',
-            });
+      if (window.google && window.google.maps && window.google.maps.Map) {
+        const fullerton = { lat: 33.88134, lng: -117.8818 };
+        const map = new window.google.maps.Map(document.getElementById('map'), {
+          zoom: 11,
+          center: fullerton,
+        });
 
-            
-            /* not adjustable yet */
-            const initCircle = new window.google.maps.Circle({
-                strokeColor: "#083D77",
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: "#083D77",
-                fillOpacity: 0.15,
-                map,
-                center: position,
-                radius: radius,    // radius range should be 1000 to 38000
-            });
+        mapRef.current = map;
 
-            setCircle(initCircle);
+        /* not adjustable yet */
+        const initCircle = new window.google.maps.Circle({
+          strokeColor: "#083D77",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#083D77",
+          fillOpacity: 0.15,
+          map,
+          center: fullerton,
+          radius: nRadius,    // radius range should be 1000 to 38000
+        });
 
-            let infoWindow = new window.google.maps.InfoWindow({
-                content: "Click the map to get Lat/Lng!",
-                position: position,
-            });
+        circleRef.current = initCircle;
 
-            infoWindow.open(map);
+        let infoWindow = new window.google.maps.InfoWindow({
+          content: "Click the map to get Lat/Lng!",
+          position: fullerton,
+        });
 
-            setClickedLatLng(position);
-            onLatLngChange(position);
+        infoWindow.open(map);
 
-            map.addListener('click', (clickEvent) => {
-              // Close the previous infoWindow
-              infoWindow.close();
-          
-              const lat = clickEvent.latLng.lat();
-              const lng = clickEvent.latLng.lng();
-              
-              const clickedLatLng = { lat, lng };
+        setClickedLatLng(fullerton);
+        onLatLngChange(fullerton);
 
-              // Create a new infoWindow for the clicked location
-              infoWindow = new window.google.maps.InfoWindow({
-                  position: clickedLatLng,
-                  center: position,
-              });
-          
-              // Update the map with the clicked location
-              map.panTo(clickEvent.latLng);
-              setClickedLatLng(clickedLatLng);
-              onLatLngChange(clickedLatLng);
-          
-              // Set content for the infoWindow with the clicked coordinates
-              const currLatLng = JSON.stringify(clickEvent.latLng.toJSON(), null, 2);
-              infoWindow.setContent(currLatLng);
-          
-              // Set center for the adjustableCircle
-              initCircle.setCenter(clickEvent.latLng);
-          
-              // Open the new infoWindow on the map
-              infoWindow.open(map);
-          
-              // Log the clicked coordinates
-              console.log('Map clicked: ', currLatLng);
-            });
+        map.addListener('click', (clickEvent) => {
+          infoWindow.close();
+
+          const lat = clickEvent.latLng.lat();
+          const lng = clickEvent.latLng.lng();
+          const clickedLatLng = { lat, lng };
+
+          // Create a new infoWindow for the clicked location
+          infoWindow = new window.google.maps.InfoWindow({
+            position: clickedLatLng,
+            center: clickedLatLng,
+          });
+
+          // update the map with the clicked location
+          map.panTo(clickEvent.latLng);
+          setClickedLatLng(clickedLatLng);
+
+          // set content for the infoWindow with the clicked coordinates
+          const currLatLng = JSON.stringify(clickEvent.latLng.toJSON(), null, 2);
+          infoWindow.setContent(currLatLng);
+
+          // Set center for the adjustableCircle
+          initCircle.setCenter(clickEvent.latLng);
+
+          // Open the new infoWindow on the map
+          infoWindow.open(map);
+
+          // Log the clicked coordinates and the updated radius
+          console.log('Map clicked: ', currLatLng);
+        });
 
       } else {
         console.error('Error: google.maps.Map not defined');
@@ -102,28 +109,22 @@ const Map = ({ onLatLngChange }) => {
 
   }, []); 
 
-  const handleRadiusChange = (event, newValue) => {
-    setRadius(newValue);
-    if (circle) {
-      circle.setRadius(newValue);
-    }
-  };
 
   return (
     <div>
       <div id="map"></div>
 
       <div className="clicked-coordinates">
-      {clickedLatLng && (
-        <div className='coordinate-text'>
-          <p>Clicked Coordinates:</p>
-          <p>Latitude: {clickedLatLng.lat}</p>
-          <p>Longitude: {clickedLatLng.lng}</p>
-        </div>
-      )}
+        {clickedLatLng && (
+          <div className='coordinate-text'>
+            <p>Clicked Coordinates:</p>
+            <p>Latitude: {clickedLatLng.lat}</p>
+            <p>Longitude: {clickedLatLng.lng}</p>
+          </div>
+        )}
         <div className='slider'>
           <Slider
-            value={radius}
+            value={nRadius}
             min={1000}    // minimum radius value
             max={38000}   // maximum radius value
             step={1000}   // step size for the slider

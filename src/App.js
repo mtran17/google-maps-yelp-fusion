@@ -8,17 +8,29 @@ import './App.css'
 
 const App = () => {
     const [clickedLatLng, setClickedLatLng] = useState(null);
+    const [searchParams, setSearchParams] = useState(null);
+    const [nRadius, setRadius] = useState(null);
 
     const handleLatLngChange = (latLng) => {
         console.log("New clickedLatLng:", latLng);
         setClickedLatLng(latLng);
     };
+
+    const handleRadiusChange = (radius) => {
+        console.log("radius (App.js): ", radius)
+        setRadius(radius)
+    }   
+
     
     return (
         <div className='body'>
             <Header/>
-            <Map initialPosition={{ lat: 33.88134, lng: -117.8818 }} onLatLngChange={handleLatLngChange} />
-            <Search clickedLatLng={clickedLatLng}/>
+            <Search clickedLatLng={clickedLatLng} radius={nRadius}/>
+            <Map initialPosition={{ lat: 33.88134, lng: -117.8818 }} 
+                onLatLngChange={handleLatLngChange}
+                onRadiusChange={handleRadiusChange}
+            />
+            {/* <SearchResults/> */}
         </div> 
     )
 }

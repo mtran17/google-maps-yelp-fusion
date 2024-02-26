@@ -1,111 +1,67 @@
-import React, { useState, useEffect } from 'react'
-import Button from '@mui/material/Button'
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React, { useState } from 'react';
+import Button from '@mui/material/Button';
+import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import './Search.css'
+import './Search.css';
 
-const theme = createTheme({
-    palette: {
-      salmon: {
-        sub: '#E18C85',
-        main: '#B3564E'
-      },
-    },
-});
+const Search = ({ clickedLatLng, radius }) => {
+    const options = [
+        'bar', 
+        'bank', 
+        'gym', 
+        'restaurant', 
+        'shopping_mall', 
+        'liquor_store', 
+        'cafe', 
+        'church'
+    ];
+    const [value, setValue] = useState(options[0]);
+    const [inputValue, setInputValue] = useState('');
 
-/*
-const options = {method: 'GET', headers: {accept: 'application/json'}};
+    if (radius === null) {
+        radius = 10000;
+    }
 
-fetch('https://api.yelp.com/v3/businesses/search?sort_by=best_match&limit=20', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
-  .catch(err => console.error(err));
-*/
+    const handleSearch = async () => {
+        console.log("Searching for : " , value, " near ", "lat: ", clickedLatLng.lat, clickedLatLng.lng, " within a ", radius, "m radius." )
 
-const Search = ({ clickedLatLng }) => {
-    const [searchValue, setSearchValue] = useState('');
+        const apiKey = 'AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio'; // Replace 'YOUR_API_KEY' with your actual API key
+        const url = `http://localhost:3000/google-places?keyword=${value || inputValue}&location=${clickedLatLng.lat},${clickedLatLng.lng}&apiKey=${apiKey}`;
+        console.log(url)
 
-    const handleSearch = () => {
-        if (clickedLatLng) {
-            console.log("Searching for:", searchValue, "near coordinates:", clickedLatLng.lat, clickedLatLng.lng);
-        } else {
-            console.log("No coordinates available");
-        }
-    };
-
-    const handleChange = (event) => {
-        setSearchValue(event.target.value);
-    };
-
-    const options = {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer QRy3peTwKHhnlMYWXQNdvfhdDXDAWmQ68YnIH2MewwmMte30eelvDw34s2OR03QCZQ5HuPS0QdtEjHcZAazrR5DFePKeaG3hvaOakvnR9waOP0jgQgEoQ3B8WCi4ZXYx'
-        }
-    };
-    
-    fetch('https://api.yelp.com/v3/businesses/search?latitude=33.93734&longitude=-117.9904&term=food&sort_by=best_match&limit=20', options)
-        .then(response => {
+        try {
+            const response = await fetch(url);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Network response was not ok (${response.status} ${response.statusText})`);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-
+            const data = await response.json();
+            console.log('Search Results:', data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // Log the error object to inspect its structure
+            console.log('Error object:', error);
+        }
+    };
 
     return (
-        <div className='search-box'>
-            <TextField
-                label="Search for food, things to do, etc."
-                variant="outlined"
-                sx={{ 
-                    width: '20vw',
-                    height: '6vh',
-                }} 
-                value={searchValue}
-                onChange={handleChange}
+        <div className='search-container'>
+            <Autocomplete
+                value={value}
+                onChange={(event, newValue) => {
+                    setValue(newValue);
+                }}
+                inputValue={inputValue}
+                onInputChange={(event, newInputValue) => {
+                    setInputValue(newInputValue);
+                }}
+                id="controllable-states-demo"
+                options={options}
+                sx={{ width: 300 }}
+                renderInput={(params) => <TextField {...params} label="Controllable" />}
             />
-
-            <ThemeProvider theme={theme}>
-                <Button variant="contained" sx={{
-                    bgcolor: 'salmon.main', 
-                    '&:hover': {
-                        bgcolor: 'salmon.sub',
-                    },
-                    width: '8vw',
-                    height: '6vh',
-                    }}
-                    onClick={handleSearch}
-                    >
-                    Search
-                </Button>
-            </ThemeProvider>
-
-
+            <Button variant="contained" onClick={handleSearch}>Search</Button>
         </div>
-    ) 
-}
-
-export default Search;
-
-/*
-const options = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    Authorization: 'Bearer QRy3peTwKHhnlMYWXQNdvfhdDXDAWmQ68YnIH2MewwmMte30eelvDw34s2OR03QCZQ5HuPS0QdtEjHcZAazrR5DFePKeaG3hvaOakvnR9waOP0jgQgEoQ3B8WCi4ZXYx'
-  }
+    );
 };
 
-fetch('https://api.yelp.com/v3/businesses/search?latitude=33.90579&longitude=-117.77125&term=food&radius=10000&sort_by=best_match&limit=20', options)
-  .then(response => response.json())
-  .then(response => console.log(response))
-  .catch(err => console.error(err));
-*/
+export default Search;

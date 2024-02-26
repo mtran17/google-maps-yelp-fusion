@@ -3,7 +3,7 @@ import './Header.css'
 
 const Header = () => {
     return (
-        <div className='Title'> BIG ASS PROJECT </div>
+        <div className='Title'> GOOGLE MAPS API PROJECT </div>
     )
 }
 
