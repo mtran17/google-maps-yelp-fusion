@@ -30,7 +30,6 @@ const App = () => {
                 onLatLngChange={handleLatLngChange}
                 onRadiusChange={handleRadiusChange}
             />
-            {/* <SearchResults/> */}
         </div> 
     )
 }

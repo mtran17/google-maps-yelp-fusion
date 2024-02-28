@@ -4,7 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import './Search.css';
 
-const Search = ({ clickedLatLng, radius }) => {
+const Search = ({ clickedLatLng, nRadius}) => {
     const options = [
         'bar', 
         'bank', 
@@ -15,38 +15,23 @@ const Search = ({ clickedLatLng, radius }) => {
         'cafe', 
         'church'
     ];
-    const [value, setValue] = useState(options[0]);
+    const [optionVal, setValue] = useState(options[0]);
     const [inputValue, setInputValue] = useState('');
 
-    if (radius === null) {
-        radius = 10000;
+    if (nRadius === null) {
+        nRadius = 10000;
     }
 
     const handleSearch = async () => {
-        console.log("Searching for : " , value, " near ", "lat: ", clickedLatLng.lat, clickedLatLng.lng, " within a ", radius, "m radius." )
+        console.log("Searching for : " , optionVal, " near ", "lat: ", clickedLatLng.lat, clickedLatLng.lng, " within a ", nRadius, "m radius." )
 
-        const apiKey = 'AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio'; // Replace 'YOUR_API_KEY' with your actual API key
-        const url = `http://localhost:3000/google-places?keyword=${value || inputValue}&location=${clickedLatLng.lat},${clickedLatLng.lng}&apiKey=${apiKey}`;
-        console.log(url)
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Network response was not ok (${response.status} ${response.statusText})`);
-            }
-            const data = await response.json();
-            console.log('Search Results:', data);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            // Log the error object to inspect its structure
-            console.log('Error object:', error);
-        }
+        // const apiKey = 'AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio'; // Replace 'YOUR_API_KEY' with your actual API key
     };
 
     return (
         <div className='search-container'>
             <Autocomplete
-                value={value}
+                value={optionVal}
                 onChange={(event, newValue) => {
                     setValue(newValue);
                 }}

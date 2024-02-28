@@ -7,14 +7,17 @@ const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
   const [nRadius, setRadius] = useState(10000);
   const mapRef = useRef(null);
   const circleRef = useRef(null);
+  
 
   const handleRadiusChange = (event, newValue) => {
     // console.log('Radius changed to:', newValue); 
     setRadius(newValue);
+    const miles = newValue * 1600; 
     if (circleRef.current) {
-      circleRef.current.setRadius(newValue);
-      onRadiusChange(newValue);
+      circleRef.current.setRadius(miles);
+      onRadiusChange(miles);
     }
+    
   };
 
   useEffect(() => {
@@ -125,11 +128,12 @@ const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
         <div className='slider'>
           <Slider
             value={nRadius}
-            min={1000}    // minimum radius value
-            max={38000}   // maximum radius value
-            step={1000}   // step size for the slider
+            min={1}    // minimum radius value
+            max={50}   // maximum radius value 1600 = 1 mile
+            step={1}   // step size for the slider
             onChange={handleRadiusChange}
             valueLabelDisplay="on"
+            valueLabelFormat={(value) => `${value} ${value === 1 ? 'mile' : 'miles'}`}
             aria-labelledby="radius-slider"
           />
         </div>
@@ -137,6 +141,7 @@ const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
 
     </div>
   );
+ 
 };
 
 export default Map;
