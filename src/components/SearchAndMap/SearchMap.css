@@ -1,5 +1,6 @@
 #map {
-    /* display: flex; */
+    margin: auto;
+
     height: 50vh;
     width: 60vw;  
     border: solid 0.1pt rgb(196, 196, 196);
@@ -11,9 +12,10 @@
     padding: 1vw;
     border: 1px solid #8a8a8a;
     background-color: #f9f9f9;
+    width: 50%;
 
-    margin-left: auto; 
-    margin-right: auto; 
+    margin-left: auto; /* Auto margin on left side */
+    margin-right: auto; /* Auto margin on right side */
 }
 
 .slider-container {
@@ -21,21 +23,29 @@
     margin: auto;
 }
 
-
 .search-container {
     margin-top: 3vh;
     margin-bottom: 3vh;
     padding-top: 3vh;
-    padding-left: 10vw;
-    
+
     border: solid black 2px ;
     width: 60vw;
     height: 10vh; 
 
-    align-items: center;
+    justify-content: center;
     display: flex;
-
 } 
+
+.search-container button {
+    width: 100px; /* specify your desired width */
+    height: 40px; /* specify your desired height */
+}
+
+.search-container .MuiAutocomplete-clearIndicator,
+.search-container .MuiAutocomplete-popupIndicator {
+    width: 30px; /* Adjust the width to your desired size */
+    height: 30px; /* Adjust the height to your desired size */
+}
 
 .search-container .MuiAutocomplete-root {
     margin-right: 10px; /* Adjust spacing between search box and button */

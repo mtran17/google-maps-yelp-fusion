@@ -1,14 +1,11 @@
 import React, {useState} from 'react';
 import Header from './components/Header/Header'
-import Map from './components/Map/Map'
-import Search from './components/Search/Search';
+import SearchAndMap from './components/SearchAndMap/SearchMap'
 import './App.css'
 
-// import Map from './components/MapOnClick/MapOnClick'
 
 const App = () => {
     const [clickedLatLng, setClickedLatLng] = useState(null);
-    const [searchParams, setSearchParams] = useState(null);
     const [nRadius, setRadius] = useState(null);
 
     const handleLatLngChange = (latLng) => {
@@ -16,20 +13,15 @@ const App = () => {
         setClickedLatLng(latLng);
     };
 
-    const handleRadiusChange = (radius) => {
-        console.log("radius (App.js): ", radius)
-        setRadius(radius)
+    const handleRadiusChange = (nRadius) => {
+        console.log("radius (App.js): ", nRadius)
+        setRadius(nRadius)
     }   
-
     
     return (
         <div className='body'>
             <Header/>
-            <Search clickedLatLng={clickedLatLng} radius={nRadius}/>
-            <Map initialPosition={{ lat: 33.88134, lng: -117.8818 }} 
-                onLatLngChange={handleLatLngChange}
-                onRadiusChange={handleRadiusChange}
-            />
+            <SearchAndMap/>
         </div> 
     )
 }

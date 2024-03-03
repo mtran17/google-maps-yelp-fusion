@@ -1,24 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
+import Button from '@mui/material/Button';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import './Map.css'
 
-const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
+const Map = ({ onLatLngChange, nRadius }) => {
   const [clickedLatLng, setClickedLatLng] = useState({ lat: 33.88134, lng: -117.8818 });
-  const [nRadius, setRadius] = useState(10000);
   const mapRef = useRef(null);
   const circleRef = useRef(null);
-  
-
-  const handleRadiusChange = (event, newValue) => {
-    // console.log('Radius changed to:', newValue); 
-    setRadius(newValue);
-    const miles = newValue * 1600; 
-    if (circleRef.current) {
-      circleRef.current.setRadius(miles);
-      onRadiusChange(miles);
-    }
-    
-  };
 
   useEffect(() => {
     const loadGoogleMapsScript = () => {
@@ -43,6 +33,7 @@ const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
         });
 
         mapRef.current = map;
+        console.log("Map.js radius: ", nRadius)
 
         /* not adjustable yet */
         const initCircle = new window.google.maps.Circle({
@@ -125,18 +116,6 @@ const Map = ({ initialPosition, onLatLngChange, onRadiusChange }) => {
             <p>Longitude: {clickedLatLng.lng}</p>
           </div>
         )}
-        <div className='slider'>
-          <Slider
-            value={nRadius}
-            min={1}    // minimum radius value
-            max={50}   // maximum radius value 1600 = 1 mile
-            step={1}   // step size for the slider
-            onChange={handleRadiusChange}
-            valueLabelDisplay="on"
-            valueLabelFormat={(value) => `${value} ${value === 1 ? 'mile' : 'miles'}`}
-            aria-labelledby="radius-slider"
-          />
-        </div>
       </div>
 
     </div>
