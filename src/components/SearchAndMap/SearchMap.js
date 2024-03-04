@@ -14,11 +14,50 @@ const SearchAndMap = () => {
         'shopping_mall', 
         'liquor_store', 
         'cafe', 
-        'church'
+        'church',
+        'dentist',
+        'pharmacy',
+        'night_club'
     ];
 
+    const prices = [
+        0,
+        1,
+        2,
+        3,
+        4,
+    ]   
+
+    const getOptionLabel = (option) => {
+        // Convert snake_case to Title Case
+        return option.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
+    const getPriceLabel = (price) => {
+        switch (price) {
+            case 0:
+                return 'Free';
+            case 1:
+                return '$';
+            case 2:
+                return '$$';
+            case 3:
+                return '$$$';
+            case 4:
+                return '$$$$';
+            default:
+                return '';
+        }
+    };
+    
+
     const [optionVal, setOptionVal] = useState(options[0]);
+    const [priceVal, setOptionPrice] = useState(prices[0]);
+
+
     const [inputValue, setInputValue] = useState('');
+    const [inputPrice, setInputPrice] = useState('');
+      
     const [nRadius, setRadius] = useState(9600); // Default radius in meters
     const [clickedLatLng, setClickedLatLng] = useState({ lat: 33.88134, lng: -117.8818 });
     const mapRef = useRef(null);
@@ -62,7 +101,7 @@ const SearchAndMap = () => {
                 circleRef.current = initCircle;
 
                 let infoWindow = new window.google.maps.InfoWindow({
-                    content: "Click the map to get Lat/Lng!",
+                    content: "Fullerton",
                     position: fullerton,
                 });
 
@@ -83,6 +122,7 @@ const SearchAndMap = () => {
                         center: clickedLatLng,
                     });
 
+                    console.log(clickEvent)
                     map.panTo(clickEvent.latLng);
                     setClickedLatLng(clickedLatLng);
 
@@ -126,7 +166,8 @@ const SearchAndMap = () => {
         placesList.innerHTML = '';
         clearMarkers();
     
-        console.log("Searching for:", optionVal, "near lat:", clickedLatLng.lat, "lng:", clickedLatLng.lng, "within a", nRadius, "m radius.");
+        console.log("Searching for:", optionVal, "near lat:", clickedLatLng.lat, "lng:", clickedLatLng.lng, "within a", nRadius, "m radius." );
+        console.log("Price: ", priceVal);
         const service = new window.google.maps.places.PlacesService(mapRef.current);
         let getNextPage;
         const moreButton = document.getElementById("more");
@@ -139,10 +180,20 @@ const SearchAndMap = () => {
         };
     
         service.nearbySearch(
-            { location: clickedLatLng, radius: nRadius, type: optionVal },
+            {   location: clickedLatLng, 
+                radius: nRadius, 
+                type: optionVal, 
+                price_level: priceVal,
+            },
             (results, status, pagination) => {
                 if (status !== "OK" || !results) return;
-                addPlaces(results, mapRef.current);
+                console.log(results)
+                const filteredResults = results.filter(place => {
+                    // Check if the first type matches optionVal
+                    return place.types[0] === optionVal;
+                });
+
+                addPlaces(filteredResults, mapRef.current);
                 moreButton.disabled = !pagination || !pagination.hasNextPage;
                 if (pagination && pagination.hasNextPage) {
                     getNextPage = () => {
@@ -178,7 +229,10 @@ const SearchAndMap = () => {
                     li.textContent = place.name;
                     placesList.appendChild(li);
                     li.addEventListener("click", () => {
-                        map.setCenter(place.geometry.location);
+                        map.panTo(place.geometry.location);
+                        window.google.maps.event.addListenerOnce(map, 'idle', () => {
+                            map.setZoom(13);
+                        });
                     });
                 }
             }
@@ -200,15 +254,33 @@ const SearchAndMap = () => {
                     onInputChange={(event, newInputValue) => {
                         setInputValue(newInputValue);
                     }}
-                    id="controllable-states-demo"
+                    id="controllable-states-demo-options"
                     options={options}
-                    sx={{ width: 500 }}
-                    renderInput={(params) => <TextField {...params} label="Controllable" />}
+                    getOptionLabel={(option) => getOptionLabel(option)}
+                    renderInput={(params) => <TextField {...params} label="Search Options" />}
+                    sx={{ width: '25vw', height: '10vh' }}
                     autoComplete={true} // Enable autocomplete
                     autoHighlight={true} // Highlight first option by default
                     clearOnEscape={true} // Clear input on pressing escape key
                 />
-                <button id="more">More</button>
+                <Autocomplete
+                    value={priceVal}
+                    onChange={(event, newPrice) => {
+                        setOptionPrice(newPrice);
+                    }}
+                    inputValue={inputPrice}
+                    onInputChange={(event, newInputPrice)=>{
+                        setInputPrice(newInputPrice)
+                    }}
+                    id="controllable-states-demo-prices"
+                    options={prices}
+                    getOptionLabel={(option) => getPriceLabel(option)}
+                    renderInput={(params) => <TextField {...params} label="Pricing" />}
+                    sx={{ width: '8vw', height: '5vh' }}
+                    autoComplete={true} // Enable autocomplete
+                    autoHighlight={true} // Highlight first option by default
+                    clearOnEscape={true} // Clear input on pressing escape key
+                />
                 <Button variant="contained" onClick={handleSearch}>Search</Button>
             </div>
             <div className='slider-container'>
@@ -224,9 +296,11 @@ const SearchAndMap = () => {
                 />
             </div>
             <div id="map"></div>
-            <ul id="places">
-                <li></li>
-            </ul>
+            <div id="sidebar">
+                <h2>Results</h2>
+                <ul id="places"></ul>
+                <button id="more">Load more results</button>
+            </div>
             <div className="clicked-coordinates">
                 {clickedLatLng && (
                     <div className='coordinate-text'>
