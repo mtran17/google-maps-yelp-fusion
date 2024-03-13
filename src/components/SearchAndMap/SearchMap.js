@@ -21,7 +21,6 @@ const SearchAndMap = () => {
     ];
 
     const prices = [
-        0,
         1,
         2,
         3,
@@ -35,8 +34,6 @@ const SearchAndMap = () => {
 
     const getPriceLabel = (price) => {
         switch (price) {
-            case 0:
-                return 'Free';
             case 1:
                 return '$';
             case 2:
@@ -188,9 +185,15 @@ const SearchAndMap = () => {
             (results, status, pagination) => {
                 if (status !== "OK" || !results) return;
                 console.log(results)
-                const filteredResults = results.filter(place => {
+
+                // Alphabetize the results by name
+                const sortedResults = results.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+
+                const filteredResults = sortedResults.filter(place => {
                     // Check if the first type matches optionVal
-                    return place.types[0] === optionVal;
+                    return place.types[0] == optionVal;
                 });
 
                 addPlaces(filteredResults, mapRef.current);
@@ -243,9 +246,9 @@ const SearchAndMap = () => {
     
 
     return (
-        <div>
+        <div className='parent-container'>
             <div className='search-container'>
-                <Autocomplete
+                <Autocomplete className='autoDropdown'
                     value={optionVal}
                     onChange={(event, newValue) => {
                         setOptionVal(newValue);
@@ -258,12 +261,12 @@ const SearchAndMap = () => {
                     options={options}
                     getOptionLabel={(option) => getOptionLabel(option)}
                     renderInput={(params) => <TextField {...params} label="Search Options" />}
-                    sx={{ width: '25vw', height: '10vh' }}
+                    sx={{ width: '25vw', height: '10vh', borderRadius: '120px'}}
                     autoComplete={true} // Enable autocomplete
                     autoHighlight={true} // Highlight first option by default
                     clearOnEscape={true} // Clear input on pressing escape key
                 />
-                <Autocomplete
+                <Autocomplete className='autoDropdown'
                     value={priceVal}
                     onChange={(event, newPrice) => {
                         setOptionPrice(newPrice);
@@ -295,21 +298,24 @@ const SearchAndMap = () => {
                     aria-labelledby="radius-slider"
                 />
             </div>
-            <div id="map"></div>
-            <div id="sidebar">
-                <h2>Results</h2>
-                <ul id="places"></ul>
-                <button id="more">Load more results</button>
+            <div className='map-side-container'>
+                <div id="map"></div>
+                <div id="sidebar">
+                    <h2>Results</h2>
+                    <ul id="places"></ul>
+                    <button id="more">Load more results</button>
+                </div>
             </div>
-            <div className="clicked-coordinates">
+            {/* <div className="clicked-coordinates">
                 {clickedLatLng && (
                     <div className='coordinate-text'>
                         <p>Clicked Coordinates:</p>
+                        {console.log(clickedLatLng)}
                         <p>Latitude: {clickedLatLng.lat}</p>
                         <p>Longitude: {clickedLatLng.lng}</p>
                     </div>
                 )}
-            </div>
+            </div> */}
         </div>
     );
 };

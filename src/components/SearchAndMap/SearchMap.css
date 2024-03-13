@@ -1,27 +1,59 @@
+.parent-container {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 40px;
+}
+
+.map-side-container  {
+    display: flex;
+}
+
 #map {
+    /* flex: 4; */
     margin: auto;
-    height: 50vh;
-    width: 60vw;  
+    width: 50vw;  
+    height: 70vh;
     border: solid 0.1pt rgb(196, 196, 196);
     border-radius: 10pt;
 }
 
-
 #sidebar {
-  flex-basis: 5rem;
-  flex-grow: 1;
-  padding: 1rem;
-  max-width: 30rem;
-  height: 50vh;
-  box-sizing: border-box;
-  overflow: auto;
-}
+    position: relative;
+    margin-left: 10px;
+    border-radius: 10px;
+    border: solid black 2pt;
+    width: 25vw;
+    height: 70vh;
+    box-sizing: border-box;
+    overflow-y: scroll; /* Allow vertical scrolling */
+    background-color: white;
+    text-align: center;
 
-#sidebar {
     display: flex;
     flex-direction: column;
 }
-  
+
+#sidebar h2 {
+    margin-right: 15px;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 0; /* Hide scrollbar */
+    background: transparent; /* Optional: if you want the scrollbar area to be transparent */
+}
+
+#more {
+    margin-top: auto;
+}
+
+#places {
+    text-align: center;
+}
+
+#places li {
+    font-size: 12pt;
+}
+
 .clicked-coordinates {
     margin-top: 2vh;
     padding: 1vw;
@@ -41,29 +73,26 @@
 .search-container {
     margin-top: 3vh;
     margin-bottom: 3vh;
-    padding-top: 3vh;
 
-    border: solid black 2px ;
-    width: 60vw;
-    height: 10vh; 
+    /* padding-top: 3vh; */
+    padding-left: 10pt;
 
-    justify-content: center;
     display: flex;
 } 
 
 .search-container button {
-    width: 100px; /* specify your desired width */
-    height: 40px; /* specify your desired height */
+    width: 100px; 
+    height: 40px;
 }
 
 .search-container .MuiAutocomplete-clearIndicator,
 .search-container .MuiAutocomplete-popupIndicator {
-    width: 30px; /* Adjust the width to your desired size */
-    height: 30px; /* Adjust the height to your desired size */
+    width: 30px;
+    height: 30px; 
 }
 
 .search-container .MuiAutocomplete-root {
-    margin-right: 10px; /* Adjust spacing between search box and button */
+    margin-right: 10px; 
 }
 
 ul {
@@ -75,36 +104,36 @@ ul {
 }
 
 li {
-background-color: #f1f1f1;
-padding: 10px;
-text-overflow: ellipsis;
-white-space: nowrap;
-overflow: hidden;
-font-size: 1.25rem;
-cursor: pointer;
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 1.25rem;
+    cursor: pointer;
 }
 
 li:nth-child(odd) {
-background-color: #fcfcfc;
+    background-color: #fcfcfc;
 }
 
 button {
-width: 100%;
-padding: 1rem;
-flex-grow: 0;
-cursor: pointer;
-background: #1a73e8;
-font-size: 1.5rem;
-color: white;
-border: none;
+    width: 100%;
+    padding: 1rem;
+    flex-grow: 0;
+    cursor: pointer;
+    background: #1a73e8;
+    font-size: 1.5rem;
+    color: white;
+    border: none;
 }
 
 button:hover {
-color: #c5d4f0;
+    color: #c5d4f0;
 }
 
 button:disabled {
-background-color: #9fc1ee;
-color: #c5d4f0;
-cursor: auto;
+    background-color: #9fc1ee;
+    color: #c5d4f0;
+    cursor: auto;
 }

@@ -5,14 +5,16 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #D7D7D7;
-}
-
-.body {
+    background-color: #c6c6c6;
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 10vh; 
+    width: 100vw;
+}
+/* 
+.body {
 
     height: 100vh; 
     width: 100vw;
-}
+} */
