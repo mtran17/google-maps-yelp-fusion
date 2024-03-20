@@ -95,6 +95,10 @@
     margin-right: 10px; 
 }
 
+#autocomplete-container {
+    flex-direction: column;
+}
+
 ul {
     list-style-type: none;
     padding: 0;

@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import './SearchMap.css';
 
+
 const SearchAndMap = () => {
     const options = [
         'bar', 
@@ -46,7 +47,6 @@ const SearchAndMap = () => {
                 return '';
         }
     };
-    
 
     const [optionVal, setOptionVal] = useState(options[0]);
     const [priceVal, setOptionPrice] = useState(prices[0]);
@@ -106,9 +106,68 @@ const SearchAndMap = () => {
 
                 setClickedLatLng(fullerton);
 
+                function initializeAutocomplete() {
+                    var input = document.getElementById('searchTextField');
+                    var autocomplete = new window.google.maps.places.Autocomplete(input);
+        
+                    // Listen for the 'place_changed' event
+                    autocomplete.addListener('place_changed', function() {
+                        infoWindow.close()
+                        var place = autocomplete.getPlace();
+                        console.log("Autocomplete result: ", place); // Log the details of the selected place
+                    
+                        // Log place.geometry.location for debugging
+                        console.log("Geometry location: ", place.geometry.location);
+                    
+                        if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
+                            const autoLatLng = {
+                                lat: place.geometry.location.lat(),
+                                lng: place.geometry.location.lng()
+                            };
+                            console.log("autoComplete lat/lng: ", autoLatLng);
+                            map.panTo(place.geometry.location);
+
+                            // Set the clicked LatLng
+                            setClickedLatLng(autoLatLng);
+
+                            // Set the content of the info window
+                            const currLatLng = JSON.stringify(autoLatLng, null, 2);
+
+                            infoWindow = new window.google.maps.InfoWindow({
+                                position: currLatLng,
+                                center: currLatLng,
+                            });
+
+                            infoWindow.setContent(currLatLng);
+                            
+                            initCircle.setCenter(autoLatLng);
+
+                            infoWindow.open(map);
+                        } else {
+                            console.log("No geometry or location found for the selected place, or location is not an instance of google.maps.LatLng.");
+                        }
+                    });
+        
+                    // Add event listener for 'keypress' event to trigger search on 'Enter' key press
+                    input.addEventListener('keypress', function(event) {
+                        if (event.key === 'Enter') {
+                            // Trigger search only if the input field is not empty
+                            if (input.value.trim() !== '') {
+                                // Simulate a click on the first prediction in the Autocomplete dropdown
+                                var firstPrediction = document.querySelector('.pac-container .pac-item');
+                                if (firstPrediction) {
+                                    firstPrediction.click();
+                                }
+                            }
+                        }
+                    });
+                }
+
+                initializeAutocomplete();
+
                 map.addListener('click', (clickEvent) => {
                     infoWindow.close();
-                    clearMarkers();
+                    clearButton();
 
                     const lat = clickEvent.latLng.lat();
                     const lng = clickEvent.latLng.lng();
@@ -148,20 +207,13 @@ const SearchAndMap = () => {
         circleRef.current.setRadius(value); 
     };
 
-    let markers = [];
-
-    function clearMarkers() {
-        markers.forEach(marker => {
-            marker.setMap(null);
-        });
-        markers = []; 
-    }
+    let markers = [];    
 
     const handleSearch = async () => {
         // Clear the existing search results and markers
         const placesList = document.getElementById("places");
         placesList.innerHTML = '';
-        clearMarkers();
+        clearButton();
     
         console.log("Searching for:", optionVal, "near lat:", clickedLatLng.lat, "lng:", clickedLatLng.lng, "within a", nRadius, "m radius." );
         console.log("Price: ", priceVal);
@@ -180,23 +232,34 @@ const SearchAndMap = () => {
             {   location: clickedLatLng, 
                 radius: nRadius, 
                 type: optionVal, 
-                price_level: priceVal,
+                maxprice: priceVal,
             },
             (results, status, pagination) => {
                 if (status !== "OK" || !results) return;
-                console.log(results)
+                console.log("search results")
+                // console.log(results)
+                results.forEach(place => {  
+                    const name = place.name;
+                    const latitude = place.geometry.location.lat();
+                    const longitude = place.geometry.location.lng();
+                    const photos = place.photos
+                    console.log(photos)
+
+                
+                    console.log("establishment name:", name, "{", latitude, ",", longitude,"}");
+                });
 
                 // Alphabetize the results by name
                 const sortedResults = results.sort((a, b) => {
                     return a.name.localeCompare(b.name);
                 });
 
-                const filteredResults = sortedResults.filter(place => {
-                    // Check if the first type matches optionVal
-                    return place.types[0] == optionVal;
-                });
+                // const filteredResults = sortedResults.filter(place => {
+                //     // Check if the first type matches optionVal
+                //     return place.types[0] === optionVal;
+                // });
 
-                addPlaces(filteredResults, mapRef.current);
+                addPlaces(sortedResults, mapRef.current);
                 moreButton.disabled = !pagination || !pagination.hasNextPage;
                 if (pagination && pagination.hasNextPage) {
                     getNextPage = () => {
@@ -207,9 +270,32 @@ const SearchAndMap = () => {
             }
         );
     
+
+        // function initializeAutocomplete() {
+        //     var input = document.getElementById('searchTextField');
+        //     var autocomplete = new window.google.maps.places.Autocomplete(input);
+
+        //     // Listen for the 'place_changed' event
+        //     autocomplete.addListener('place_changed', function() {
+        //         infoWindow.close()
+        //         var place = autocomplete.getPlace();
+        //         console.log("Autocomplete result: ", place); // Log the details of the selected place
+            
+        //         // Log place.geometry.location for debugging
+        //         console.log("Geometry location: ", place.geometry.location);
+            
+        //         if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
+        //             const autoLatLng = {
+        //                 lat: place.geometry.location.lat(),
+        //                 lng: place.geometry.location.lng()
+        //             };
+        //             console.log("autoComplete lat/lng: ", autoLatLng);
+        //             map.panTo(place.geometry.location);
+
+
         function addPlaces(places, map) {
             for (const place of places) {
-                if (place.geometry && place.geometry.location) {
+                // if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
                     const image = {
                         url: place.icon,
                         size: new window.google.maps.Size(71, 71),
@@ -218,11 +304,18 @@ const SearchAndMap = () => {
                         scaledSize: new window.google.maps.Size(25, 25),
                     };
     
+                    const markerLatLng = {
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng()
+                    }
+
+                    console.log("searchMarker latLng: ",markerLatLng)
+
                     const marker = new window.google.maps.Marker({
                         map,
                         icon: image,
                         title: place.name,
-                        position: place.geometry.location,
+                        position: markerLatLng,
                     });
     
                     markers.push(marker); // Store the marker in the array
@@ -237,16 +330,32 @@ const SearchAndMap = () => {
                             map.setZoom(13);
                         });
                     });
-                }
+                // } else { /* places that don't have a location */
+
+                // }
             }
         }
     };
     
+    const clearButton = async() => {
+        const clearButton = document.getElementById("clear");
+        clearButton.onclick = function() {
+            markers.forEach(marker => {
+                marker.setMap(null);
+            });
+            markers = [];
+        } 
+        // results === null; 
+    }
+
     
-    
+
 
     return (
         <div className='parent-container'>
+            <div id="autocomplete-container">
+                <input id="searchTextField" type="text" size="50"/>
+            </div>
             <div className='search-container'>
                 <Autocomplete className='autoDropdown'
                     value={optionVal}
@@ -261,7 +370,7 @@ const SearchAndMap = () => {
                     options={options}
                     getOptionLabel={(option) => getOptionLabel(option)}
                     renderInput={(params) => <TextField {...params} label="Search Options" />}
-                    sx={{ width: '25vw', height: '10vh', borderRadius: '120px'}}
+                    sx={{ width: '25vw', height: '10vh'}}
                     autoComplete={true} // Enable autocomplete
                     autoHighlight={true} // Highlight first option by default
                     clearOnEscape={true} // Clear input on pressing escape key
@@ -304,6 +413,7 @@ const SearchAndMap = () => {
                     <h2>Results</h2>
                     <ul id="places"></ul>
                     <button id="more">Load more results</button>
+                    <button id="clear"> Clear Results </button>
                 </div>
             </div>
             {/* <div className="clicked-coordinates">
