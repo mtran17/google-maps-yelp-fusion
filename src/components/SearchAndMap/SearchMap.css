@@ -71,32 +71,61 @@
 }
 
 .search-container {
-    margin-top: 3vh;
-    margin-bottom: 3vh;
-
-    /* padding-top: 3vh; */
-    padding-left: 10pt;
-
     display: flex;
 } 
 
-.search-container button {
+.autoDropdown {
+    /* border-radius: 20pt;
+    width: 12vw;
+    height: 5vh;
+    border: solid black 2pt;
+    background-color: white; */
+    border-radius: 10pt;
+    width: 12vw;
+    height: 6vh;
+    border: solid black 2pt;
+    background-color: white;
+}
+
+.inputAutocomplete {
+    width: 100%;
+    left: 13px;
+}
+
+/* .inputAutocomplete input {
+    flex: 1;
+    margin: 0; 
+}
+
+.inputAutocomplete .MuiInputLabel-root {
+    transform: translate(0, -50%) scale(1); 
+} */
+
+.searchButton {
     width: 100px; 
     height: 40px;
 }
 
-.search-container .MuiAutocomplete-clearIndicator,
-.search-container .MuiAutocomplete-popupIndicator {
+.MuiAutocomplete-clearIndicator, .MuiAutocomplete-popupIndicator {
     width: 30px;
     height: 30px; 
-}
-
-.search-container .MuiAutocomplete-root {
-    margin-right: 10px; 
+    right: 20px;
 }
 
 #autocomplete-container {
-    flex-direction: column;
+    display: flex;
+    margin: auto;
+    margin-top: 20px;
+    gap: 20px;
+}
+
+#searchTextField {
+    width: 15vw;
+    height: 4vh;
+
+    padding: 10px;
+    border: solid black 2pt;
+    border-radius: 10pt;
 }
 
 ul {

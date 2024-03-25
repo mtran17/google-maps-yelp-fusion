@@ -5,6 +5,9 @@ import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import './SearchMap.css';
 
+// require('dotenv').config();
+const axios = require('axios');
+
 
 const SearchAndMap = () => {
     const options = [
@@ -63,7 +66,14 @@ const SearchAndMap = () => {
     useEffect(() => {
         const loadGoogleMapsScript = () => {
             const script = document.createElement('script');
+
+            // mapsAPIKey = process.env.GOOGLE_MAPS_API_KEY;
+            // console.log(mapsAPIKey)
+
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio&libraries=places&callback=initMap`;
+            // script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsAPIKey}o&libraries=places&callback=initMap`;
+            
+            
             script.async = true;
             script.defer = true;
 
@@ -167,7 +177,6 @@ const SearchAndMap = () => {
 
                 map.addListener('click', (clickEvent) => {
                     infoWindow.close();
-                    clearButton();
 
                     const lat = clickEvent.latLng.lat();
                     const lng = clickEvent.latLng.lng();
@@ -213,7 +222,6 @@ const SearchAndMap = () => {
         // Clear the existing search results and markers
         const placesList = document.getElementById("places");
         placesList.innerHTML = '';
-        clearButton();
     
         console.log("Searching for:", optionVal, "near lat:", clickedLatLng.lat, "lng:", clickedLatLng.lng, "within a", nRadius, "m radius." );
         console.log("Price: ", priceVal);
@@ -243,10 +251,10 @@ const SearchAndMap = () => {
                     const latitude = place.geometry.location.lat();
                     const longitude = place.geometry.location.lng();
                     const photos = place.photos
-                    console.log(photos)
+                    console.log("photos : ", photos)
 
                 
-                    console.log("establishment name:", name, "{", latitude, ",", longitude,"}");
+                    // console.log("establishment name:", name, "{", latitude, ",", longitude,"}");
                 });
 
                 // Alphabetize the results by name
@@ -260,6 +268,7 @@ const SearchAndMap = () => {
                 // });
 
                 addPlaces(sortedResults, mapRef.current);
+                removePlaces(sortedResults, mapRef.current)
                 moreButton.disabled = !pagination || !pagination.hasNextPage;
                 if (pagination && pagination.hasNextPage) {
                     getNextPage = () => {
@@ -269,94 +278,81 @@ const SearchAndMap = () => {
                 }
             }
         );
-    
 
-        // function initializeAutocomplete() {
-        //     var input = document.getElementById('searchTextField');
-        //     var autocomplete = new window.google.maps.places.Autocomplete(input);
-
-        //     // Listen for the 'place_changed' event
-        //     autocomplete.addListener('place_changed', function() {
-        //         infoWindow.close()
-        //         var place = autocomplete.getPlace();
-        //         console.log("Autocomplete result: ", place); // Log the details of the selected place
-            
-        //         // Log place.geometry.location for debugging
-        //         console.log("Geometry location: ", place.geometry.location);
-            
-        //         if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
-        //             const autoLatLng = {
-        //                 lat: place.geometry.location.lat(),
-        //                 lng: place.geometry.location.lng()
-        //             };
-        //             console.log("autoComplete lat/lng: ", autoLatLng);
-        //             map.panTo(place.geometry.location);
-
+        markers = []
 
         function addPlaces(places, map) {
             for (const place of places) {
                 // if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
-                    const image = {
-                        url: place.icon,
-                        size: new window.google.maps.Size(71, 71),
-                        origin: new window.google.maps.Point(0, 0),
-                        anchor: new window.google.maps.Point(17, 34),
-                        scaledSize: new window.google.maps.Size(25, 25),
-                    };
-    
-                    const markerLatLng = {
-                        lat: place.geometry.location.lat(),
-                        lng: place.geometry.location.lng()
-                    }
+                const image = {
+                    url: place.icon,
+                    size: new window.google.maps.Size(71, 71),
+                    origin: new window.google.maps.Point(0, 0),
+                    anchor: new window.google.maps.Point(17, 34),
+                    scaledSize: new window.google.maps.Size(25, 25),
+                };
 
-                    console.log("searchMarker latLng: ",markerLatLng)
+                const markerLatLng = {
+                    lat: place.geometry.location.lat(),
+                    lng: place.geometry.location.lng()
+                }
 
-                    const marker = new window.google.maps.Marker({
-                        map,
-                        icon: image,
-                        title: place.name,
-                        position: markerLatLng,
+                // console.log("searchMarker latLng: ",markerLatLng)
+
+                const marker = new window.google.maps.Marker({
+                    map,
+                    icon: image,
+                    title: place.name,
+                    position: markerLatLng,
+                });
+
+                markers.push(marker); // Store the marker in the array
+
+                const li = document.createElement("li");
+
+                li.textContent = place.name;
+                placesList.appendChild(li);
+                li.addEventListener("click", () => {
+                    map.panTo(place.geometry.location);
+                    window.google.maps.event.addListenerOnce(map, 'idle', () => {
+                        map.setZoom(13);
                     });
-    
-                    markers.push(marker); // Store the marker in the array
-    
-                    const li = document.createElement("li");
-    
-                    li.textContent = place.name;
-                    placesList.appendChild(li);
-                    li.addEventListener("click", () => {
-                        map.panTo(place.geometry.location);
-                        window.google.maps.event.addListenerOnce(map, 'idle', () => {
-                            map.setZoom(13);
-                        });
-                    });
-                // } else { /* places that don't have a location */
-
-                // }
+                });
             }
         }
-    };
-    
-    const clearButton = async() => {
-        const clearButton = document.getElementById("clear");
-        clearButton.onclick = function() {
-            markers.forEach(marker => {
-                marker.setMap(null);
-            });
+            
+        function removePlaces(markers,map) {
+            const clearButton = document.getElementById("clear");
+            const placesList = document.getElementById("places");
+            clearButton.onclick = function() {
+                deleteMarkers();
+                placesList.innerHTML = '';
+            }
+
+        }
+
+        function setMapOnAll(map) {
+            for (let i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+          
+        // Removes the markers from the map, but keeps them in the array.
+        function hideMarkers() {
+            setMapOnAll(null);
+        }
+
+        function deleteMarkers() {
+            hideMarkers();
             markers = [];
-        } 
-        // results === null; 
-    }
+        }
+    };
 
     
-
 
     return (
         <div className='parent-container'>
             <div id="autocomplete-container">
-                <input id="searchTextField" type="text" size="50"/>
-            </div>
-            <div className='search-container'>
                 <Autocomplete className='autoDropdown'
                     value={optionVal}
                     onChange={(event, newValue) => {
@@ -366,16 +362,25 @@ const SearchAndMap = () => {
                     onInputChange={(event, newInputValue) => {
                         setInputValue(newInputValue);
                     }}
-                    id="controllable-states-demo-options"
+                    id="clear-on-escape"
                     options={options}
                     getOptionLabel={(option) => getOptionLabel(option)}
-                    renderInput={(params) => <TextField {...params} label="Search Options" />}
-                    sx={{ width: '25vw', height: '10vh'}}
-                    autoComplete={true} // Enable autocomplete
-                    autoHighlight={true} // Highlight first option by default
-                    clearOnEscape={true} // Clear input on pressing escape key
+                    clearOnEscape
+                    renderInput={(params) => (
+                        <TextField className='inputAutocomplete' 
+                            {...params} 
+                            label="search for ... " 
+                            variant="standard" 
+                            InputProps={{ ...params.InputProps, disableUnderline: true, autoFocus: true }} 
+                        />
+                    )}
                 />
-                <Autocomplete className='autoDropdown'
+                <p> near </p>
+                <input id="searchTextField" type="text" size="50"/>
+                <Button className="searchButton" variant="contained" onClick={handleSearch}>Search</Button>
+            </div>
+            <div className='search-container'>
+                <Autocomplete className='autoDropdown paramButton'
                     value={priceVal}
                     onChange={(event, newPrice) => {
                         setOptionPrice(newPrice);
@@ -393,7 +398,6 @@ const SearchAndMap = () => {
                     autoHighlight={true} // Highlight first option by default
                     clearOnEscape={true} // Clear input on pressing escape key
                 />
-                <Button variant="contained" onClick={handleSearch}>Search</Button>
             </div>
             <div className='slider-container'>
                 <Slider
@@ -431,3 +435,31 @@ const SearchAndMap = () => {
 };
 
 export default SearchAndMap;
+
+
+/*
+
+        // function initializeAutocomplete() {
+        //     var input = document.getElementById('searchTextField');
+        //     var autocomplete = new window.google.maps.places.Autocomplete(input);
+
+        //     // Listen for the 'place_changed' event
+        //     autocomplete.addListener('place_changed', function() {
+        //         infoWindow.close()
+        //         var place = autocomplete.getPlace();
+        //         console.log("Autocomplete result: ", place); // Log the details of the selected place
+            
+        //         // Log place.geometry.location for debugging
+        //         console.log("Geometry location: ", place.geometry.location);
+            
+        //         if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
+        //             const autoLatLng = {
+        //                 lat: place.geometry.location.lat(),
+        //                 lng: place.geometry.location.lng()
+        //             };
+        //             console.log("autoComplete lat/lng: ", autoLatLng);
+        //             map.panTo(place.geometry.location);
+
+
+
+*/
