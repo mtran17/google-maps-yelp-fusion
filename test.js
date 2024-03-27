@@ -5,7 +5,7 @@ async function searchBusiness(term, location) {
     try{
         const response = await axios.get('https://api.yelp.com/v3/businesses/search',{
             headers : {
-                Authorization:`Bearer ${process.env.YELP_API_KEY}`
+                Authorization:`Bearer ${process.env.REACT_APP_YELP_APP_KEY}`
             },
             params: {
                 term, location
@@ -17,21 +17,6 @@ async function searchBusiness(term, location) {
     }
 }
 
-async function searchByPhone(phone) {
-    try {
-        const response = await axios.get('https://api.yelp.com/v3/businesses/search/phone',{
-            headers : {
-                Authorization:`Bearer ${process.env.YELP_API_KEY}`
-            },
-            params: {
-                phone
-            }
-        });
-        return response.data
-    } catch (e) {
-        console.error('Error', e)
-    }
-}
 
 (async() => {
     const businesses = await searchBusiness('food', 'Newyork')

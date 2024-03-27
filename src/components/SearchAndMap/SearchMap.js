@@ -5,8 +5,7 @@ import TextField from '@mui/material/TextField';
 import Slider from '@mui/material/Slider';
 import './SearchMap.css';
 
-// require('dotenv').config();
-const axios = require('axios');
+import axios from 'axios';
 
 
 const SearchAndMap = () => {
@@ -67,13 +66,9 @@ const SearchAndMap = () => {
         const loadGoogleMapsScript = () => {
             const script = document.createElement('script');
 
-            // mapsAPIKey = process.env.GOOGLE_MAPS_API_KEY;
-            // console.log(mapsAPIKey)
+            // script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio&libraries=places&callback=initMap`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
 
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyCUnmqTkhklqvM0P2AjfHMVyx7bxBmMwio&libraries=places&callback=initMap`;
-            // script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsAPIKey}o&libraries=places&callback=initMap`;
-            
-            
             script.async = true;
             script.defer = true;
 
@@ -218,10 +213,31 @@ const SearchAndMap = () => {
 
     let markers = [];    
 
+    // async function handleSearch(lat, lng, radius, term, price) {
+    //     try {
+    //         const response = await axios.get('https://api.yelp.com/v3/businesses/search', {
+    //             headers: {
+    //                 Authorization: 'Bearer QRy3peTwKHhnlMYWXQNdvfhdDXDAWmQ68YnIH2MewwmMte30eelvDw34s2OR03QCZQ5HuPS0QdtEjHcZAazrR5DFePKeaG3hvaOakvnR9waOP0jgQgEoQ3B8WCi4ZXYx'
+    //             },
+    //             params: {
+    //                 term : 'food',
+    //                 location : 'newyork',
+    //                 limit : 20
+    //             }
+    //         });
+    //         console.log(response.data)
+    //         return response.data;
+    //     } catch (error) {
+    //         console.error('Error: ', error);
+    //         return null;
+    //     }
+    // }
+
+        
+    
+
     const handleSearch = async () => {
         // Clear the existing search results and markers
-        const placesList = document.getElementById("places");
-        placesList.innerHTML = '';
     
         console.log("Searching for:", optionVal, "near lat:", clickedLatLng.lat, "lng:", clickedLatLng.lng, "within a", nRadius, "m radius." );
         console.log("Price: ", priceVal);
@@ -262,13 +278,14 @@ const SearchAndMap = () => {
                     return a.name.localeCompare(b.name);
                 });
 
-                // const filteredResults = sortedResults.filter(place => {
-                //     // Check if the first type matches optionVal
-                //     return place.types[0] === optionVal;
-                // });
+                const filteredResults = sortedResults.filter(place => {
+                    // Check if the first type matches optionVal
+                    return place.types[0] === optionVal;
+                });
 
                 addPlaces(sortedResults, mapRef.current);
                 removePlaces(sortedResults, mapRef.current)
+
                 moreButton.disabled = !pagination || !pagination.hasNextPage;
                 if (pagination && pagination.hasNextPage) {
                     getNextPage = () => {
@@ -280,73 +297,76 @@ const SearchAndMap = () => {
         );
 
         markers = []
-
-        function addPlaces(places, map) {
-            for (const place of places) {
-                // if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
-                const image = {
-                    url: place.icon,
-                    size: new window.google.maps.Size(71, 71),
-                    origin: new window.google.maps.Point(0, 0),
-                    anchor: new window.google.maps.Point(17, 34),
-                    scaledSize: new window.google.maps.Size(25, 25),
-                };
-
-                const markerLatLng = {
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng()
-                }
-
-                // console.log("searchMarker latLng: ",markerLatLng)
-
-                const marker = new window.google.maps.Marker({
-                    map,
-                    icon: image,
-                    title: place.name,
-                    position: markerLatLng,
-                });
-
-                markers.push(marker); // Store the marker in the array
-
-                const li = document.createElement("li");
-
-                li.textContent = place.name;
-                placesList.appendChild(li);
-                li.addEventListener("click", () => {
-                    map.panTo(place.geometry.location);
-                    window.google.maps.event.addListenerOnce(map, 'idle', () => {
-                        map.setZoom(13);
-                    });
-                });
-            }
-        }
-            
-        function removePlaces(markers,map) {
-            const clearButton = document.getElementById("clear");
-            const placesList = document.getElementById("places");
-            clearButton.onclick = function() {
-                deleteMarkers();
-                placesList.innerHTML = '';
-            }
-
-        }
-
-        function setMapOnAll(map) {
-            for (let i = 0; i < markers.length; i++) {
-                markers[i].setMap(map);
-            }
-        }
-          
-        // Removes the markers from the map, but keeps them in the array.
-        function hideMarkers() {
-            setMapOnAll(null);
-        }
-
-        function deleteMarkers() {
-            hideMarkers();
-            markers = [];
-        }
     };
+
+    function addPlaces(places, map) {
+        const placesList = document.getElementById("places");
+        placesList.innerHTML = '';
+
+        for (const place of places) {
+            // if (place.geometry && place.geometry.location instanceof window.google.maps.LatLng) {
+            const image = {
+                url: place.icon,
+                size: new window.google.maps.Size(71, 71),
+                origin: new window.google.maps.Point(0, 0),
+                anchor: new window.google.maps.Point(17, 34),
+                scaledSize: new window.google.maps.Size(25, 25),
+            };
+
+            const markerLatLng = {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
+            }
+
+            // console.log("searchMarker latLng: ",markerLatLng)
+
+            const marker = new window.google.maps.Marker({
+                map,
+                icon: image,
+                title: place.name,
+                position: markerLatLng,
+            });
+
+            markers.push(marker); // Store the marker in the array
+
+            const li = document.createElement("li");
+
+            li.textContent = place.name;
+            placesList.appendChild(li);
+            li.addEventListener("click", () => {
+                map.panTo(place.geometry.location);
+                window.google.maps.event.addListenerOnce(map, 'idle', () => {
+                    map.setZoom(13);
+                });
+            });
+        }
+    }
+        
+    function removePlaces(markers,map) {
+        const clearButton = document.getElementById("clear");
+        const placesList = document.getElementById("places");
+        clearButton.onclick = function() {
+            deleteMarkers();
+            placesList.innerHTML = '';
+        }
+
+    }
+
+    function setMapOnAll(map) {
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].setMap(map);
+        }
+    }
+      
+    // Removes the markers from the map, but keeps them in the array.
+    function hideMarkers() {
+        setMapOnAll(null);
+    }
+
+    function deleteMarkers() {
+        hideMarkers();
+        markers = [];
+    }
 
     
 
